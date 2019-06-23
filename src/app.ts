@@ -4,6 +4,7 @@ import * as _ from "underscore";
 import { CurrencyPairTradesCounter } from "./currency_pair";
 import { BinanceMarket } from "./markets/binance";
 import { Monitor } from "./monitor";
+import { AmqpSender } from "./amqp";
 
 // Create Express server
 const app = express();
@@ -50,9 +51,11 @@ app.get('/', function(req, res) {
   res.end();
 });
 
-app.listen(3000);
+app.listen(3005);
 
-const monitor = new Monitor();
+// Todo: put in config
+const publisher = new AmqpSender('amqp://localhost', 'azulay-test');
+const monitor = new Monitor(publisher);
 
 function initMonitor() {
   const binance = new BinanceMarket();

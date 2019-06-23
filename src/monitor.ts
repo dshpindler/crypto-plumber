@@ -1,6 +1,13 @@
 import { CurrencyPairTradesCounter } from "./currency_pair";
+import { AmqpSender } from "./amqp";
 
 export class Monitor {
+  private publisher: AmqpSender;
+  constructor(publisher: AmqpSender) {
+    this.publisher = publisher;
+    publisher.init();
+  }
+
   public currencyPairs: {
     [symbol: string]: CurrencyPairTradesCounter
   } = {};
@@ -34,6 +41,7 @@ export class Monitor {
     const rate2 = this.currencyPairs[symbol].getRate(2, 0);
     if (rate2 >= 100) {
       this.flaggedPairs.add(symbol);
+      this.publisher.send(symbol);
     }
   }
 
