@@ -38,7 +38,6 @@ export class Monitor {
   }
 
   private checkCondition(symbol: string) {
-    this.publisher.send(symbol);//TODO: remove
     const rate2 = this.currencyPairs[symbol].getRate(2, 0);
     if (rate2 >= 100) {
       this.flaggedPairs.add(symbol);
