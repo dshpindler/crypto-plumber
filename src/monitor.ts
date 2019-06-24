@@ -5,7 +5,6 @@ export class Monitor {
   private publisher: AmqpSender;
   constructor(publisher: AmqpSender) {
     this.publisher = publisher;
-    publisher.init();
   }
 
   public currencyPairs: {
@@ -27,6 +26,7 @@ export class Monitor {
       const max120 = this.currencyPairs[symbol].getMaximum(30);
       const average30d5 = this.currencyPairs[symbol].getRate(30, 5);
       if (rate2 >= 100) {
+        this.publisher.send(symbol);
         this.flaggedPairs.add(symbol);
       }
       const flagged = this.flaggedPairs.has(symbol);
@@ -38,6 +38,7 @@ export class Monitor {
   }
 
   private checkCondition(symbol: string) {
+    this.publisher.send(symbol);//TODO: remove
     const rate2 = this.currencyPairs[symbol].getRate(2, 0);
     if (rate2 >= 100) {
       this.flaggedPairs.add(symbol);

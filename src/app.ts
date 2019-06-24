@@ -53,9 +53,12 @@ app.get('/', function(req, res) {
 
 app.listen(3005);
 
-// Todo: put in config
-const publisher = new AmqpSender('amqp://localhost', 'azulay-test');
+const rabbitConf = config.get<{url: string, queue: string}>("rabbitmq");
+const publisher = new AmqpSender(rabbitConf.url, rabbitConf.queue);
 const monitor = new Monitor(publisher);
+publisher
+.init()
+.then(() => initMonitor());
 
 function initMonitor() {
   const binance = new BinanceMarket();
@@ -66,5 +69,30 @@ function initMonitor() {
   monitor.startMonitoring();
 }
 
-initMonitor();
+
+var amqp = require('amqplib/callback_api');
+amqp.connect('amqp://localhost', function(error0:any, connection:any) {
+    if (error0) {
+        throw error0;
+    }
+    connection.createChannel(function(error1:any, channel:any) {
+        if (error1) {
+            throw error1;
+        }
+
+        var queue = rabbitConf.queue;
+
+        channel.assertQueue(queue, {
+            durable: false
+        });
+
+        console.log(" [*] Waiting for messages in %s. To exit press CTRL+C", queue);
+
+        channel.consume(queue, function(msg:any) {
+            console.log(" [x] Received %s", msg.content.toString());
+        }, {
+            noAck: true
+        });
+    });
+});
 

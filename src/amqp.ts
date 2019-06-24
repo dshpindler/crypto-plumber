@@ -13,15 +13,10 @@ export class AmqpSender {
     }
 
     async init() {
-        console.log('running init!!!!!!!')
-        await Amqp.connect(this.url)
-            .then((connection: Amqp.Connection) => {
-                this.connection = connection;
-                return connection.createChannel()
-            }).then((channel: Amqp.Channel) => {
-                this.channel = channel;
-                channel.assertQueue(this.queue, { durable: false });
-            })
+        console.log('running init!!!!!!!');
+        this.connection = await Amqp.connect(this.url);
+        this.channel = await this.connection.createChannel();
+        this.channel.assertQueue(this.queue, { durable: false });
     }
 
     async getChannel() {
@@ -33,16 +28,13 @@ export class AmqpSender {
     }
 
     send(message: string) {
-        this.getChannel()
-            .then((channel) => {
-                this.channel.sendToQueue(this.queue, Buffer.from(message));
+        return this.getChannel()
+            .then((channel: Amqp.Channel) => {
+                channel.sendToQueue(this.queue, Buffer.from(message));
                 console.log(" [x] Sent %s", message);
             })
             .catch(error => {
                 console.error(error);
-                // this.connection.close();
-                // this.channel.close();
-                // this.channel = null;
             });
     }
 }

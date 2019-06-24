@@ -7,19 +7,8 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "aaa",
+            "name": "Launch Program",
             "program": "${workspaceFolder}/dist/server.js"
         },
-        
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Launch Program",
-            "program": "${workspaceFolder}/serve",
-            "preLaunchTask": "tsc: build - tsconfig.json",
-            "outFiles": [
-                "${workspaceFolder}/dist/**/*.js"
-            ]
-        }
     ]
 }
