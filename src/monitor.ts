@@ -1,6 +1,12 @@
 import { CurrencyPairTradesCounter } from "./currency_pair";
+import { AmqpSender } from "./amqp";
 
 export class Monitor {
+  private publisher: AmqpSender;
+  constructor(publisher: AmqpSender) {
+    this.publisher = publisher;
+  }
+
   public currencyPairs: {
     [symbol: string]: CurrencyPairTradesCounter
   } = {};
@@ -20,6 +26,7 @@ export class Monitor {
       const max120 = this.currencyPairs[symbol].getMaximum(30);
       const average30d5 = this.currencyPairs[symbol].getRate(30, 5);
       if (rate2 >= 100) {
+        this.publisher.send(symbol);
         this.flaggedPairs.add(symbol);
       }
       const flagged = this.flaggedPairs.has(symbol);
@@ -34,6 +41,7 @@ export class Monitor {
     const rate2 = this.currencyPairs[symbol].getRate(2, 0);
     if (rate2 >= 100) {
       this.flaggedPairs.add(symbol);
+      this.publisher.send(symbol);
     }
   }
 

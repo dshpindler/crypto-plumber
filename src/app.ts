@@ -4,6 +4,7 @@ import * as _ from "underscore";
 import { CurrencyPairTradesCounter } from "./currency_pair";
 import { BinanceMarket } from "./markets/binance";
 import { Monitor } from "./monitor";
+import { AmqpSender } from "./amqp";
 
 // Create Express server
 const app = express();
@@ -50,9 +51,14 @@ app.get('/', function(req, res) {
   res.end();
 });
 
-app.listen(3000);
+app.listen(3005);
 
-const monitor = new Monitor();
+const rabbitConf = config.get<{url: string, queue: string}>("rabbitmq");
+const publisher = new AmqpSender(rabbitConf.url, rabbitConf.queue);
+const monitor = new Monitor(publisher);
+publisher
+.init()
+.then(() => initMonitor());
 
 function initMonitor() {
   const binance = new BinanceMarket();
@@ -63,5 +69,30 @@ function initMonitor() {
   monitor.startMonitoring();
 }
 
-initMonitor();
+
+var amqp = require('amqplib/callback_api');
+amqp.connect('amqp://localhost', function(error0:any, connection:any) {
+    if (error0) {
+        throw error0;
+    }
+    connection.createChannel(function(error1:any, channel:any) {
+        if (error1) {
+            throw error1;
+        }
+
+        var queue = rabbitConf.queue;
+
+        channel.assertQueue(queue, {
+            durable: false
+        });
+
+        console.log(" [*] Waiting for messages in %s. To exit press CTRL+C", queue);
+
+        channel.consume(queue, function(msg:any) {
+            console.log(" [x] Received %s", msg.content.toString());
+        }, {
+            noAck: true
+        });
+    });
+});
 

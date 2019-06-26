@@ -1,4 +1,9 @@
 {
+    "rabbitmq": {
+        "url": "amqp://localhost",
+        "exchange": "pubmp-exchange",
+        "queue": "pumps"
+    },
     "currencyPairs": [
         "ethbtc",
         "trxbtc",
