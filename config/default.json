@@ -1,6 +1,6 @@
 {
     "rabbitmq": {
-        "url": "amqp://172.17.0.2",
+        "url": "amqp://localhost",
         "exchange": "pubmp-exchange",
         "queue": "pumps"
     },

@@ -26,7 +26,6 @@ export class Monitor {
       const max120 = this.currencyPairs[symbol].getMaximum(30);
       const average30d5 = this.currencyPairs[symbol].getRate(30, 5);
       if (rate2 >= 100) {
-        this.publisher.send(symbol);
         this.flaggedPairs.add(symbol);
       }
       const flagged = this.flaggedPairs.has(symbol);
